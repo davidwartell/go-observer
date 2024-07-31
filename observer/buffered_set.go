@@ -33,7 +33,7 @@ type BufferedSetObserver struct {
 // NewBufferedSetObserver
 // Creates new instance of BufferedSetObserver.
 // If bufferDuration is 0 then the message is delivered immediately to all observers.
-func NewBufferedSetObserver(bufferDuration time.Duration) *BufferedSetObserver {
+func NewBufferedSetObserver(ctx context.Context, bufferDuration time.Duration) *BufferedSetObserver {
 	eventsChan := make(chan string)
 	obs := &BufferedSetObserver{
 		events:         eventsChan,
@@ -41,7 +41,7 @@ func NewBufferedSetObserver(bufferDuration time.Duration) *BufferedSetObserver {
 		bufferEvents:   make(map[string]struct{}),
 		bufferReceived: 0,
 	}
-	obs.ctx, obs.cancel = context.WithCancel(context.Background())
+	obs.ctx, obs.cancel = context.WithCancel(context.WithoutCancel(ctx))
 	obs.ctxDone = obs.ctx.Done()
 	obs.eventLoop(eventsChan)
 	return obs
